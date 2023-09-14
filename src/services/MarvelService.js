@@ -27,9 +27,18 @@ class MarvelService {
     }
 
     _transformCharacter = (char) => {
+        let descr = char.description;
+        if(descr.length === 0)
+        {
+            descr = 'О данном персонаже недостаточно информации'
+        }
+        if(descr.length > 200)
+        {
+            descr = descr.slice(0,200) + '...'
+        }
         return{
             name: char.name,
-            description: char.description,
+            description: descr,
             thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
             homepage: char.urls[0].url,
             wiki: char.urls[1].url 
