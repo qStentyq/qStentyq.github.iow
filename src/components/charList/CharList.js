@@ -1,9 +1,11 @@
 import './charList.scss';
 import ErrorMessage from '../errorModal/errorModal';
 import Spinner from '../spinner/spinner';
-import { Component } from 'react';
+import React, { Component } from 'react';
 import MarvelService from '../../services/MarvelService';
 import PropTypes from 'prop-types';
+
+
 
 class CharList extends Component  {
     state = {
@@ -13,6 +15,9 @@ class CharList extends Component  {
         offset: 200,
         newItemLoading: false,
         charEnded: false}
+    
+        
+        
 
         marvelService = new MarvelService();
 
@@ -22,6 +27,7 @@ class CharList extends Component  {
                 .then(this.onRandomHeroList)
                 .catch(this.onError)
         }
+    
         onError = () => {
             this.setState({
                 error: true,
@@ -60,8 +66,20 @@ class CharList extends Component  {
                 offset: offset + 9
             }))
         }
+
+        itemRefs = [];
+
+        setRef = (ref) => {
+            this.itemRefs.push(ref)
+        }
+        onFocusHero = (id) => {
+
+            this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
+            this.itemRefs[id].classList.add('char__item_selected')
+            this.itemRefs[id].focus()
+        }
         renderItems(arr) {
-            const items =  arr.map((item) => {
+            const items =  arr.map((item, i) => {
                 let imgStyle = {'objectFit' : 'cover'};
                 if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                     imgStyle = {'objectFit' : 'unset'};
@@ -70,8 +88,19 @@ class CharList extends Component  {
                 return (
                     <li 
                         className="char__item"
+                        tabIndex={0}
+                        ref={this.setRef}
                         key={item.id}
-                        onClick={() => this.props.onCharSelected(item.id)}>
+                        onClick={() => {
+                            this.props.onCharSelected(item.id);
+                            this.onFocusHero(i);
+                        }}
+                        onKeyPress={(e) => {
+                            if (e.key === ' ' || e.key === "Enter") {
+                                this.props.onCharSelected(item.id);
+                                this.onFocusHero(i);
+                            }
+                        }}>
                             <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                             <div className="char__name">{item.name}</div>
                     </li>
@@ -115,6 +144,6 @@ class CharList extends Component  {
 }
 
 CharList.propTypes = {
-    onCharSelected: PropTypes.func
+    onCharSelected: PropTypes.func.isRequired
 }
 export default CharList;
